@@ -1,4 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from app.ui.levels_texts import LEVEL_GUIDE_BUTTON, LEVEL_GUIDE_CLOSE_BUTTON, LEVEL_DONE_BUTTON
 
 
 def kb_interface_lang() -> InlineKeyboardMarkup:
@@ -11,7 +12,6 @@ def kb_interface_lang() -> InlineKeyboardMarkup:
 
 
 def kb_target_lang() -> InlineKeyboardMarkup:
-    # label -> target_lang code
     items = [
         ("🇷🇺 Русский", "ru"),
         ("🇬🇧 English", "en"),
@@ -34,7 +34,10 @@ def kb_target_lang() -> InlineKeyboardMarkup:
 
     return InlineKeyboardMarkup(rows)
 
-def kb_level() -> InlineKeyboardMarkup:
+
+def kb_level(lang: str = "ru") -> InlineKeyboardMarkup:
+    lang = lang if lang in ("ru", "en") else "ru"
+
     rows = [
         [
             InlineKeyboardButton("A0", callback_data="onb:level:A0"),
@@ -48,16 +51,42 @@ def kb_level() -> InlineKeyboardMarkup:
             InlineKeyboardButton("C2", callback_data="onb:level:C2"),
         ],
         [
-            InlineKeyboardButton("❓ Какой у меня уровень?", callback_data="onb:level_help"),
+            InlineKeyboardButton(LEVEL_GUIDE_BUTTON.get(lang, LEVEL_GUIDE_BUTTON["ru"]), callback_data="onb:level_help"),
+            InlineKeyboardButton(LEVEL_DONE_BUTTON.get(lang, LEVEL_DONE_BUTTON["ru"]), callback_data="onb:level_done"),
         ],
     ]
     return InlineKeyboardMarkup(rows)
 
 
-def kb_dup_interface() -> InlineKeyboardMarkup:
+def kb_level_guide_close(lang: str = "ru") -> InlineKeyboardMarkup:
+    lang = lang if lang in ("ru", "en") else "ru"
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(LEVEL_GUIDE_CLOSE_BUTTON.get(lang, LEVEL_GUIDE_CLOSE_BUTTON["ru"]), callback_data="onb:level_help_close")]
+    ])
+
+
+def kb_dup_interface(lang: str = "ru") -> InlineKeyboardMarkup:
+    # оставляем RU/EN как было — позже сделаем локализацию, если захочешь
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton("Да", callback_data="onb:dub:yes"),
             InlineKeyboardButton("Нет", callback_data="onb:dub:no"),
         ]
     ])
+
+def kb_style(lang: str = "ru") -> InlineKeyboardMarkup:
+    lang = lang if lang in ("ru", "en") else "ru"
+    if lang == "en":
+        casual = "😎 Casual"
+        business = "🧑‍💼 Business"
+    else:
+        casual = "😎 Разговорный"
+        business = "🧑‍💼 Деловой"
+
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(casual, callback_data="onb:style:casual"),
+            InlineKeyboardButton(business, callback_data="onb:style:business"),
+        ]
+    ])
+
