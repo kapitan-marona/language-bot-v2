@@ -4,23 +4,22 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 def kb_interface_lang() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("Русский", callback_data="onb:iface:ru"),
-            InlineKeyboardButton("English", callback_data="onb:iface:en"),
+            InlineKeyboardButton("🇷🇺 Русский", callback_data="onb:iface:ru"),
+            InlineKeyboardButton("🇬🇧 English", callback_data="onb:iface:en"),
         ]
     ])
 
 
 def kb_target_lang() -> InlineKeyboardMarkup:
-    # Минимальный набор, как у тебя в онбординге на скринах
-    # code — это то, что мы будем хранить в users.target_lang
+    # label -> target_lang code
     items = [
-        ("Русский", "ru"),
-        ("English", "en"),
-        ("Français", "fr"),
-        ("Español", "es"),
-        ("Deutsch", "de"),
-        ("Svenska", "sv"),
-        ("Suomi", "fi"),
+        ("🇷🇺 Русский", "ru"),
+        ("🇬🇧 English", "en"),
+        ("🇫🇷 Français", "fr"),
+        ("🇪🇸 Español", "es"),
+        ("🇩🇪 Deutsch", "de"),
+        ("🇸🇪 Svenska", "sv"),
+        ("🇫🇮 Suomi", "fi"),
     ]
 
     rows = []
@@ -34,4 +33,3 @@ def kb_target_lang() -> InlineKeyboardMarkup:
         rows.append(row)
 
     return InlineKeyboardMarkup(rows)
-

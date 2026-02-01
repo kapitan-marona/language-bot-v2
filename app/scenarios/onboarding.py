@@ -12,12 +12,7 @@ class OnboardingScenario:
     Step 2: promo ask (text: code or "нет"/"no")
     Step 3: welcome message
     Step 4: choose target language (buttons)
-
-    Next steps (later):
-    Step 5: choose level
-    Step 6: duplicate interface for A0/A1
-    Step 7: choose style
-    Step 8: final message + start chat
+    Step 5: choose level (next)
     """
 
     def __init__(self):
@@ -49,10 +44,10 @@ class OnboardingScenario:
             low = raw.lower()
 
             no_words = {"нет", "не", "неа", "нету", "no", "nope", "none"}
-            # Пока промо-логику не применяем (PromoArbiter будет позже),
-            # но шаг онбординга должен идти дальше.
-            # В будущем здесь будет apply_promo(raw).
-            _ = raw  # placeholder, чтобы не терять смысл
+
+            # Пока промо-логику не применяем (подключим PromoArbiter позже),
+            # но шаг должен двигаться дальше.
+            _promo = None if low in no_words else raw
 
             # Переходим к шагу 3–4: welcome + выбор языка
             self.onb.set_stage(ctx.user_id, "target_lang")
@@ -72,11 +67,13 @@ class OnboardingScenario:
             )
             return
 
-        # Fallback
-        await ctx.update.message.reply_text(
-            t("onboarding_use_buttons", il),
-            reply_markup=kb_interface_lang(),
-        )
+        # STEP 5: Level (пока заглушка — следующий коммит сделаем кнопки)
+        if stage == "level_choose":
+            await ctx.update.message.reply_text(t("choose_level_stub", il))
+            return
+
+        # Unknown state fallback (без кнопок и без языков интерфейса)
+        await ctx.update.message.reply_text(t("onboarding_unknown_state", il))
 
     async def handle_callback(self, ctx):
         q = ctx.update.callback_query
@@ -88,6 +85,13 @@ class OnboardingScenario:
         if data.startswith("onb:iface:"):
             lang = data.split(":")[-1]  # ru / en
             self.users.update_user(ctx.user_id, interface_lang=lang)
+
+            # ✅ убрать кнопки у сообщения с выбором языка интерфейса
+            try:
+                await q.edit_message_reply_markup(reply_markup=None)
+            except Exception:
+                pass
+
             self.onb.set_stage(ctx.user_id, "promo_ask")
             await q.message.reply_text(t("ask_promo", lang))
             return
@@ -97,17 +101,19 @@ class OnboardingScenario:
             target = data.split(":")[-1]  # en/de/fi/...
             self.users.update_user(ctx.user_id, target_lang=target)
 
-            # Следующий шаг будет выбор уровня
-            self.onb.set_stage(ctx.user_id, "level_choose")
+            # ✅ убрать кнопки у сообщения с выбором языка изучения
+            try:
+                await q.edit_message_reply_markup(reply_markup=None)
+            except Exception:
+                pass
 
-            await q.message.reply_text(t("target_lang_saved_stub", il))
+            # Следующий шаг будет выбор уровня (кнопки добавим следующим коммитом)
+            self.onb.set_stage(ctx.user_id, "level_choose")
+            await q.message.reply_text(t("choose_level_stub", il))
             return
 
-        # Unknown callback
-        await q.message.reply_text(
-            t("onboarding_use_buttons", il),
-            reply_markup=kb_interface_lang(),
-        )
+        # Unknown callback fallback (без кнопок)
+        await q.message.reply_text(t("onboarding_unknown_state", il))
 
     async def voice_not_allowed(self, ctx):
         il = ctx.user.get("interface_lang", "ru")

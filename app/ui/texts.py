@@ -19,6 +19,9 @@ TEXTS = {
         "welcome_after_promo": "👋 Привет! Добро пожаловать в Talktome — пространство, где прокачивать языки легко и интересно.\n\nСейчас я помогу тебе выбрать язык для изучения, уровень и стиль общения.",
         "choose_target_lang": "Выбери язык для изучения:",
         "target_lang_saved_stub": "✅ Отлично! Язык выбран. Дальше — уровень (следующим шагом).",
+        "onboarding_unknown_state": "⚠️ Похоже, я потерял шаг онбординга. Нажми /start, чтобы начать заново.",
+        "choose_level_stub": "Выбор уровня — следующий шаг. (Сейчас добавим кнопки A0–C2.)",
+
 
     },
     "en": {
@@ -41,6 +44,8 @@ TEXTS = {
         "welcome_after_promo": "👋 Hi! Welcome to Talktome — a space where improving languages feels easy and fun.\n\nNow I’ll help you choose your target language, level and speaking style.",
         "choose_target_lang": "Choose your target language:",
         "target_lang_saved_stub": "✅ Great! Target language saved. Next: choose your level (coming next).",
+        "onboarding_unknown_state": "⚠️ Looks like I lost the onboarding step. Send /start to begin again.",
+        "choose_level_stub": "Level selection is the next step. (Buttons A0–C2 are coming next.)",
 
     },
 }
