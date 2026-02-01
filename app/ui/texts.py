@@ -16,6 +16,10 @@ TEXTS = {
         "promo_stub": "Промокоды подключим следующим шагом через единый PromoArbiter.",
         "limit_reached": "Лимит бесплатных сообщений на сегодня исчерпан (15/день). Активируй промокод или премиум.",
         "onboarding_done_stub": "✅ Ок! Онбординг продолжаем допиливать, но ты уже можешь общаться со мной. Напиши любое сообщение 🙂",
+        "welcome_after_promo": "👋 Привет! Добро пожаловать в Talktome — пространство, где прокачивать языки легко и интересно.\n\nСейчас я помогу тебе выбрать язык для изучения, уровень и стиль общения.",
+        "choose_target_lang": "Выбери язык для изучения:",
+        "target_lang_saved_stub": "✅ Отлично! Язык выбран. Дальше — уровень (следующим шагом).",
+
     },
     "en": {
         "choose_interface_lang": "Choose your interface language:",
@@ -34,6 +38,10 @@ TEXTS = {
         "promo_stub": "Promo codes will be implemented next via a single PromoArbiter.",
         "limit_reached": "Daily free limit reached (15/day). Activate a promo code or premium.",
         "promo_received_stub": "✅ Promo code received: {code}\n(Promo logic is being implemented next.)\nYou can chat now 🙂",
+        "welcome_after_promo": "👋 Hi! Welcome to Talktome — a space where improving languages feels easy and fun.\n\nNow I’ll help you choose your target language, level and speaking style.",
+        "choose_target_lang": "Choose your target language:",
+        "target_lang_saved_stub": "✅ Great! Target language saved. Next: choose your level (coming next).",
+
     },
 }
 
