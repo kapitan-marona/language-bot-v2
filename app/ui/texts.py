@@ -21,6 +21,20 @@ TEXTS = {
         "target_lang_saved_stub": "✅ Отлично! Язык выбран. Дальше — уровень (следующим шагом).",
         "onboarding_unknown_state": "⚠️ Похоже, я потерял шаг онбординга. Нажми /start, чтобы начать заново.",
         "choose_level_stub": "Выбор уровня — следующий шаг. (Сейчас добавим кнопки A0–C2.)",
+        "choose_level": "🧠 Выбери свой уровень:",
+        "level_help": (
+            "Подсказка по уровням:\n"
+            "A0 — начинаю с нуля\n"
+            "A1 — понимаю простые фразы, могу представиться\n"
+            "A2 — могу объясниться в быту, но с ошибками\n"
+            "B1 — уверенно в повседневных темах\n"
+            "B2 — довольно свободно, понимаю сложные тексты\n"
+            "C1 — почти как носитель в большинстве ситуаций\n"
+            "C2 — максимально близко к носителю"
+        ),
+        "ask_dup_interface": "Хочешь, я буду дублировать свои сообщения на языке интерфейса?",
+        "choose_style_stub": "Выбор стиля — следующий шаг. (Сейчас добавим кнопки «Разговорный / Деловой».)",
+
 
 
     },
@@ -46,6 +60,19 @@ TEXTS = {
         "target_lang_saved_stub": "✅ Great! Target language saved. Next: choose your level (coming next).",
         "onboarding_unknown_state": "⚠️ Looks like I lost the onboarding step. Send /start to begin again.",
         "choose_level_stub": "Level selection is the next step. (Buttons A0–C2 are coming next.)",
+        "choose_level": "🧠 Choose your level:",
+        "level_help": (
+            "Level guide:\n"
+            "A0 — starting from zero\n"
+            "A1 — simple phrases, introductions\n"
+            "A2 — basic everyday communication (with mistakes)\n"
+            "B1 — confident in daily topics\n"
+            "B2 — quite fluent, understands complex texts\n"
+            "C1 — near-native in most situations\n"
+            "C2 — максимально близко к native level"
+        ),
+        "ask_dup_interface": "Do you want me to duplicate my messages in your interface language?",
+        "choose_style_stub": "Style selection is the next step. (Buttons «Casual / Business» are coming next.)",
 
     },
 }
