@@ -10,6 +10,7 @@ from app.ui.keyboards import (
 )
 from app.ui.texts import t
 from app.ui.levels_texts import get_level_guide
+from app.domain.prompt_templates import START_MESSAGE, MATT_INTRO, pick_intro_question, PROMO_ASK
 
 
 class OnboardingScenario:
@@ -31,11 +32,6 @@ class OnboardingScenario:
         )
 
     async def handle(self, ctx):
-        """
-        Text input during onboarding:
-        - allowed only at promo_ask stage
-        - otherwise show the relevant step UI or a neutral fallback
-        """
         stage = (ctx.onboarding or {}).get("stage", "interface_lang")
         il = ctx.user.get("interface_lang", "ru")
 
@@ -47,10 +43,13 @@ class OnboardingScenario:
             return
 
         if stage == "promo_ask":
-            # promo вводим текстом; пока не применяем (PromoArbiter позже)
+            # promo вводим текстом; применим позже через PromoArbiter
             self.onb.set_stage(ctx.user_id, "target_lang")
 
-            await ctx.update.message.reply_text(t("welcome_after_promo", il))
+            # ✅ стартовое сообщение из prompt_templates
+            msg = START_MESSAGE.get(il, START_MESSAGE["ru"])
+            await ctx.update.message.reply_text(msg)
+
             await ctx.update.message.reply_text(
                 t("choose_target_lang", il),
                 reply_markup=kb_target_lang(),
@@ -94,7 +93,7 @@ class OnboardingScenario:
         data = q.data or ""
         il = ctx.user.get("interface_lang", "ru")
 
-        # -------- Step 1: interface language --------
+        # Step 1: interface language
         if data.startswith("onb:iface:"):
             lang = data.split(":")[-1]
             self.users.update_user(ctx.user_id, interface_lang=lang)
@@ -102,10 +101,10 @@ class OnboardingScenario:
             await self._safe_delete(q.message)
 
             self.onb.set_stage(ctx.user_id, "promo_ask")
-            await q.message.chat.send_message(t("ask_promo", lang))
+            await q.message.chat.send_message(PROMO_ASK.get(lang, PROMO_ASK["ru"]))
             return
 
-        # -------- Step 4: target language --------
+        # Step 4: target language
         if data.startswith("onb:target:"):
             target = data.split(":")[-1]
             self.users.update_user(ctx.user_id, target_lang=target)
@@ -119,7 +118,7 @@ class OnboardingScenario:
             )
             return
 
-        # -------- Step 5: level guide --------
+        # Step 5: level guide
         if data == "onb:level_help":
             guide_text = get_level_guide(il)
             await q.message.chat.send_message(
@@ -133,7 +132,7 @@ class OnboardingScenario:
             await self._safe_delete(q.message)
             return
 
-        # -------- Step 5: level selected --------
+        # Step 5: level selected
         if data.startswith("onb:level:"):
             level = data.split(":")[-1]
             self.users.update_user(ctx.user_id, level=level)
@@ -155,7 +154,7 @@ class OnboardingScenario:
             )
             return
 
-        # -------- Step 5: level done --------
+        # Step 5: level done
         if data == "onb:level_done":
             user = self.users.get_user(ctx.user_id)
             level = (user or {}).get("level")
@@ -184,7 +183,7 @@ class OnboardingScenario:
             )
             return
 
-        # -------- Step 6: duplication selected --------
+        # Step 6: duplication selected
         if data.startswith("onb:dub:"):
             v = data.split(":")[-1]
             dub = 1 if v == "yes" else 0
@@ -199,7 +198,7 @@ class OnboardingScenario:
             )
             return
 
-        # -------- Step 7: style selected --------
+        # Step 7–8: style selected -> complete onboarding + intro + question
         if data.startswith("onb:style:"):
             style = data.split(":")[-1]  # casual|business
             self.users.update_user(ctx.user_id, style=style)
@@ -209,10 +208,20 @@ class OnboardingScenario:
             # ✅ complete onboarding
             self.onb.complete(ctx.user_id)
 
-            await q.message.chat.send_message(t("onboarding_done", il))
+            # Fetch latest user settings for question
+            user = self.users.get_user(ctx.user_id) or {}
+            target = (user.get("target_lang") or "en").lower()
+            level = (user.get("level") or "A2").upper()
+
+            # 1) Matt intro in UI language
+            intro = MATT_INTRO.get(il, MATT_INTRO["ru"])
+            await q.message.chat.send_message(intro)
+
+            # 2) First question in target language
+            first_q = pick_intro_question(level=level, style=style, lang=target)
+            await q.message.chat.send_message(first_q)
             return
 
-        # Unknown callback
         await q.message.chat.send_message(t("onboarding_unknown_state", il))
 
     async def voice_not_allowed(self, ctx):

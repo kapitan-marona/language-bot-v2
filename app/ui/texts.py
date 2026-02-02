@@ -2,32 +2,25 @@
 
 TEXTS = {
     "ru": {
-        # Onboarding
+        # Onboarding UI (короткие вопросы/заголовки для экранов)
         "choose_interface_lang": "Выбери язык интерфейса:",
-        "ask_promo": "У тебя есть промокод?\n👉 Введи его или напиши 'нет'",
-        "welcome_after_promo": (
-            "👋 Привет! Добро пожаловать в Talktome — пространство, где прокачивать языки легко и интересно.\n\n"
-            "Сейчас я помогу тебе выбрать язык для изучения, уровень и стиль общения."
-        ),
         "choose_target_lang": "Выбери язык для изучения:",
         "choose_level": "🧠 Выбери свой уровень:",
         "ask_dup_interface": "Хочешь, я буду дублировать свои сообщения на языке интерфейса?",
-        "choose_style_stub": "Выбор стиля — следующий шаг. (Сейчас добавим кнопки «Разговорный / Деловой».)",
+        "choose_style": "🎭 Выбери стиль общения:",
         "onboarding_unknown_state": "⚠️ Похоже, я потерял шаг онбординга. Нажми /start, чтобы начать заново.",
         "voice_not_in_onboarding": "Голосовые сообщения будут доступны после онбординга.",
-        "choose_style": "🎭 Выбери стиль общения:",
-        "onboarding_done": "Готово! Можно начинать 💬\n\nНастройки: /settings\nПереводчик: /translator_on и /translator_off",
 
-
-        # Global / System
+        # System / commands
         "help": "Команды: /start, /settings, /translator_on, /translator_off, /promo",
         "limit_reached": "Лимит бесплатных сообщений на сегодня исчерпан (15/день). Активируй промокод или премиум.",
 
-        # Modes / stubs
+        # Modes
         "translator_on": "Переводчик включён. Чтобы выйти: /translator_off",
         "translator_off": "Чат-режим включён. Чтобы включить переводчик: /translator_on",
-        "promo_stub": "Промокоды подключим следующим шагом через единый PromoArbiter.",
 
+        # Stubs (пока не подключили)
+        "promo_stub": "Промокоды подключим следующим шагом через единый PromoArbiter.",
         "chat_stub_reply": "Я на месте 🙂 (пока это заглушка). Следующий шаг — подключить модель и контекст 20 пар.",
         "translator_stub": "TRANSLATOR MODE: (заглушка) — сюда подключим чистый перевод без смайлов и пояснений.",
         "voice_stub": "Голосовой режим скоро подключим (STT/TTS). Пока можно писать текстом.",
@@ -36,32 +29,25 @@ TEXTS = {
     },
 
     "en": {
-        # Onboarding
+        # Onboarding UI
         "choose_interface_lang": "Choose your interface language:",
-        "ask_promo": "Do you have a promo code?\n👉 Enter it or type 'no'",
-        "welcome_after_promo": (
-            "👋 Hi! Welcome to Talktome — a space where improving languages feels easy and fun.\n\n"
-            "Now I’ll help you choose your target language, level and speaking style."
-        ),
-        "choose_target_lang": "Choose your target language:",
+        "choose_target_lang": "Choose a language to learn:",
         "choose_level": "🧠 Choose your level:",
         "ask_dup_interface": "Do you want me to duplicate my messages in your interface language?",
-        "choose_style_stub": "Style selection is the next step. (Buttons «Casual / Business» are coming next.)",
+        "choose_style": "🎭 Choose your conversation style:",
         "onboarding_unknown_state": "⚠️ Looks like I lost the onboarding step. Send /start to begin again.",
         "voice_not_in_onboarding": "Voice messages will be available after onboarding.",
-        "choose_style": "🎭 Choose your conversation style:",
-        "onboarding_done": "All set! You can start chatting 💬\n\nSettings: /settings\nTranslator: /translator_on and /translator_off",
 
-
-        # Global / System
+        # System / commands
         "help": "Commands: /start, /settings, /translator_on, /translator_off, /promo",
         "limit_reached": "Daily free limit reached (15/day). Activate a promo code or premium.",
 
-        # Modes / stubs
+        # Modes
         "translator_on": "Translator enabled. Exit: /translator_off",
         "translator_off": "Chat mode enabled. Enable translator: /translator_on",
-        "promo_stub": "Promo codes will be implemented next via a single PromoArbiter.",
 
+        # Stubs
+        "promo_stub": "Promo codes will be implemented next via a single PromoArbiter.",
         "chat_stub_reply": "I’m here 🙂 (stub). Next: connect the model + 20-pair context.",
         "translator_stub": "TRANSLATOR MODE: (stub) — we’ll add clean translation (no emojis, no explanations).",
         "voice_stub": "Voice mode is coming (STT/TTS). For now, please use text.",
