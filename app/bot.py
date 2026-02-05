@@ -1,10 +1,16 @@
 import os
-from telegram.ext import Application, MessageHandler, CallbackQueryHandler, CommandHandler, filters
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    filters,
+)
 
 from app.dispatcher.dispatcher import Dispatcher
 
-_TG_APP = None
-_DISPATCHER = None
+_TG_APP: Application | None = None
+_DISPATCHER: Dispatcher | None = None
 
 
 def get_dispatcher() -> Dispatcher:
@@ -26,22 +32,19 @@ def get_telegram_app() -> Application:
     application = Application.builder().token(token).build()
     dispatcher = get_dispatcher()
 
-    # Commands (system) — still go through dispatcher (to keep one brain),
-    # but PTB requires explicit handlers for /commands if we want.
-    application.add_handler(CommandHandler("start", dispatcher.handle_command))
-    application.add_handler(CommandHandler("help", dispatcher.handle_command))
-    application.add_handler(CommandHandler("settings", dispatcher.handle_command))
-    application.add_handler(CommandHandler("translator_on", dispatcher.handle_command))
-    application.add_handler(CommandHandler("translator_off", dispatcher.handle_command))
-    application.add_handler(CommandHandler("promo", dispatcher.handle_command))
+    # ✅ Commands: перечисляем явно, чтобы PTB точно маршрутизировал /команды
+    application.add_handler(CommandHandler(
+        ["start", "help", "settings", "translator_on", "translator_off", "promo", "debug_user"],
+        dispatcher.handle_command,
+    ))
 
-    # One text handler → central dispatcher
+    # ✅ Text (не команды) → central dispatcher
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, dispatcher.handle_text))
 
-    # Voice/audio handler → central dispatcher
+    # ✅ Voice / Audio → central dispatcher
     application.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, dispatcher.handle_voice))
 
-    # Callbacks → central dispatcher
+    # ✅ Callbacks → central dispatcher
     application.add_handler(CallbackQueryHandler(dispatcher.handle_callback))
 
     _TG_APP = application
