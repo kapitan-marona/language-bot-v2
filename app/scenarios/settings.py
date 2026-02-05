@@ -2,7 +2,6 @@ from app.storage.users_repo import UsersRepo
 from app.ui.texts import t
 
 
-
 class SettingsScenario:
     def __init__(self):
         self.users = UsersRepo()
@@ -38,17 +37,14 @@ class SettingsScenario:
         await ctx.update.callback_query.answer()
         await ctx.update.callback_query.message.reply_text(t("settings_stub", il))
 
-
     async def debug_user(self, ctx):
         user = ctx.user or {}
-
         text = (
+            f"user_id = {ctx.user_id}\n"
             f"level = {user.get('level')}\n"
-            f"dub = {user.get('dub_interface_for_low_levels')}\n"
-            f"ui = {user.get('interface_lang')}\n"
-            f"target = {user.get('target_lang')}\n"
-            f"mode = {user.get('task_mode')}\n"
+            f"dub_interface_for_low_levels = {user.get('dub_interface_for_low_levels')}\n"
+            f"interface_lang = {user.get('interface_lang')}\n"
+            f"target_lang = {user.get('target_lang')}\n"
+            f"task_mode = {user.get('task_mode')}\n"
         )
-
         await ctx.update.message.reply_text(text)
-

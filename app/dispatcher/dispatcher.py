@@ -53,6 +53,7 @@ class Dispatcher:
             # We'll wire PromoScenario later; for now show placeholder
             return await self.settings.promo_placeholder(ctx)
 
+        # ✅ DEBUG
         if text.startswith("/debug_user"):
             return await self.settings.debug_user(ctx)
 
@@ -60,6 +61,10 @@ class Dispatcher:
         return await self.settings.help(ctx)
 
     async def handle_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        # ✅ If a command arrived as plain text, still route it to handle_command
+        if update.message and update.message.text and update.message.text.strip().startswith("/"):
+            return await self.handle_command(update, context)
+
         ctx = await self._build_ctx(update, context)
 
         # Onboarding capture
