@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from .levels_texts import LEVEL_GUIDE_BUTTON, LEVEL_GUIDE_CLOSE_BUTTON, LEVEL_DONE_BUTTON
+from app.ui.levels_texts import LEVEL_GUIDE_BUTTON, LEVEL_GUIDE_CLOSE_BUTTON
 
 
 def kb_interface_lang() -> InlineKeyboardMarkup:
@@ -35,10 +35,10 @@ def kb_target_lang() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(rows)
 
 
-def kb_level(lang: str = "ru") -> InlineKeyboardMarkup:
-    lang = lang if lang in ("ru", "en") else "ru"
+def kb_level(lang="ru"):
+    L = "ru" if lang == "ru" else "en"
 
-    rows = [
+    buttons = [
         [
             InlineKeyboardButton("A0", callback_data="onb:level:A0"),
             InlineKeyboardButton("A1", callback_data="onb:level:A1"),
@@ -47,15 +47,20 @@ def kb_level(lang: str = "ru") -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton("B1", callback_data="onb:level:B1"),
             InlineKeyboardButton("B2", callback_data="onb:level:B2"),
+        ],
+        [
             InlineKeyboardButton("C1", callback_data="onb:level:C1"),
             InlineKeyboardButton("C2", callback_data="onb:level:C2"),
         ],
         [
-            InlineKeyboardButton(LEVEL_GUIDE_BUTTON.get(lang, LEVEL_GUIDE_BUTTON["ru"]), callback_data="onb:level_help"),
-            InlineKeyboardButton(LEVEL_DONE_BUTTON.get(lang, LEVEL_DONE_BUTTON["ru"]), callback_data="onb:level_done"),
+            InlineKeyboardButton(
+                LEVEL_GUIDE_BUTTON[L],
+                callback_data="onb:level_help"
+            )
         ],
     ]
-    return InlineKeyboardMarkup(rows)
+
+    return InlineKeyboardMarkup(buttons)
 
 
 def kb_level_guide_close(lang: str = "ru") -> InlineKeyboardMarkup:

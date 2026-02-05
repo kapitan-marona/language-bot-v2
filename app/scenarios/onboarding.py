@@ -166,33 +166,6 @@ class OnboardingScenario:
             return
 
         # Step 5: level done
-        if data == "onb:level_done":
-            user = self.users.get_user(ctx.user_id) or {}
-            level = user.get("level")
-
-            if not level:
-                await q.message.chat.send_message(
-                    t("choose_level", il),
-                    reply_markup=kb_level(il),
-                )
-                return
-
-            await self._safe_delete(q.message)
-
-            if level in {"A0", "A1"}:
-                self.onb.set_stage(ctx.user_id, "dup_choose")
-                await q.message.chat.send_message(
-                    t("ask_dup_interface", il),
-                    reply_markup=kb_dup_interface(il),
-                )
-                return
-
-            self.onb.set_stage(ctx.user_id, "style_choose")
-            await q.message.chat.send_message(
-                t("choose_style", il),
-                reply_markup=kb_style(il),
-            )
-            return
 
         # Step 6: duplication selected
         if data.startswith("onb:dub:"):

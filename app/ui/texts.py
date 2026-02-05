@@ -3,7 +3,7 @@
 TEXTS = {
     "ru": {
         # Onboarding UI (короткие вопросы/заголовки для экранов)
-        "choose_interface_lang": "Выбери язык интерфейса:",
+        "choose_interface_lang": "Выбери язык интерфейса:\nChoose your interface language:",
         "choose_target_lang": "Выбери язык для изучения:",
         "choose_level": "🧠 Выбери свой уровень:",
         "ask_dup_interface": "Хочешь, я буду дублировать свои сообщения на языке интерфейса?",
@@ -30,7 +30,7 @@ TEXTS = {
 
     "en": {
         # Onboarding UI
-        "choose_interface_lang": "Choose your interface language:",
+        "choose_interface_lang": "Выбери язык интерфейса:\nChoose your interface language:",
         "choose_target_lang": "Choose a language to learn:",
         "choose_level": "🧠 Choose your level:",
         "ask_dup_interface": "Do you want me to duplicate my messages in your interface language?",
