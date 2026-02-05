@@ -1,3 +1,4 @@
+# app/scenarios/chat.py
 from app.storage.chat_repo import ChatRepo
 from app.domain.llm import ask_openai_chat
 from app.domain.prompt_templates import get_system_prompt
@@ -19,6 +20,9 @@ class ChatScenario:
         style = (user.get("style") or "casual").lower()
         mode = (user.get("mode") or "text").lower()
 
+        # ✅ ADD: duplication flag (A0/A1 only; applied in prompt_templates)
+        dub = int(user.get("dub_interface_for_low_levels") or 0)
+
         # 1) сохраняем юзера
         self.chat.add(ctx.user_id, "user", user_text)
 
@@ -34,13 +38,19 @@ class ChatScenario:
             mode=mode,
             task_mode="chat",
             translator_cfg=None,
+            dub_interface_for_low_levels=dub,  # ✅ ADD
         )
 
         # 4) ответ модели
         reply = ask_openai_chat(system_prompt=system_prompt, messages=msgs)
 
+        # ✅ ADD: if reply contains UI duplicate, don't store it in history (keeps TARGET context clean)
+        reply_for_history = reply
+        if "\nUI:" in reply:
+            reply_for_history = reply.split("\nUI:", 1)[0].strip()
+
         # 5) сохраняем и режем
-        self.chat.add(ctx.user_id, "assistant", reply)
+        self.chat.add(ctx.user_id, "assistant", reply_for_history)
         self.chat.trim_to_pairs(ctx.user_id, pairs=20)
 
         await ctx.update.message.reply_text(reply, parse_mode="HTML")

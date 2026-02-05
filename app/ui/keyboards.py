@@ -71,11 +71,19 @@ def kb_level_guide_close(lang: str = "ru") -> InlineKeyboardMarkup:
 
 
 def kb_dup_interface(lang: str = "ru") -> InlineKeyboardMarkup:
-    # оставляем RU/EN как было — позже сделаем локализацию, если захочешь
+    lang = lang if lang in ("ru", "en") else "ru"
+
+    if lang == "en":
+        yes = "Yes"
+        no = "No"
+    else:
+        yes = "Да"
+        no = "Нет"
+
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("Да", callback_data="onb:dub:yes"),
-            InlineKeyboardButton("Нет", callback_data="onb:dub:no"),
+            InlineKeyboardButton(yes, callback_data="onb:dub:yes"),
+            InlineKeyboardButton(no, callback_data="onb:dub:no"),
         ]
     ])
 

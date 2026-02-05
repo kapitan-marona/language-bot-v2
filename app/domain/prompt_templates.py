@@ -1,4 +1,4 @@
-# handlers/chat/prompt_templates.py
+# app/domain/prompt_templates.py
 from __future__ import annotations
 import random
 
@@ -51,7 +51,7 @@ def get_tariff_intro_msg(
     """
     Возвращает второе сообщение после интро — в зависимости от тарифа.
     """
-    L = "ru" if (lang or "").lower() == "ru" else "en"
+    L = "ru" if lang == "ru" else "en"
 
     def _ru_days(n: int) -> str:
         n = abs(int(n))
@@ -364,6 +364,7 @@ def get_system_prompt(
     mode: str,
     task_mode: str = "chat",
     translator_cfg: dict | None = None,
+    dub_interface_for_low_levels: bool | int | None = None,  # ✅ ADD
 ) -> str:
     """
     КОМПАКТНАЯ системка для быстрого отклика без потери «характера».
@@ -380,6 +381,10 @@ def get_system_prompt(
     tgt   = (target_lang or "en").lower()
     md    = (mode or "text").lower()
     tm    = (task_mode or "chat").lower()
+
+    # ✅ ADD: decide if we need UI-duplicate
+    dub_on = bool(dub_interface_for_low_levels)
+    need_ui_dup = dub_on and (lvl in ("A0", "A1")) and (ui != tgt) and (tm != "translator")
 
     # [CHANGED] Крошечные стиль-хинты для проблемных и усиляемых языков — минимально, чтоб не замедлять.
     style_hint = ""
@@ -442,6 +447,13 @@ def get_system_prompt(
             "If the user asks to translate ('переведи','translate','как будет','how to say'): (1) brief positive ack; (2) one-line translation matching style & level; (3) ONE short follow-up in TARGET.",
             "Prefer established equivalents for idioms; otherwise translate faithfully.",
         ]
+
+        # ✅ ADD: UI duplicate for low levels (A0/A1) when enabled
+        if need_ui_dup:
+            rules += [
+                "After your TARGET-language reply, add a short UI-language duplicate (ONE short sentence) on a new line prefixed exactly with 'UI: '.",
+                "The UI duplicate must NOT add a second follow-up question. It should briefly mirror the meaning of your reply.",
+            ]
 
     # Собираем без пустых строк
     return "\n".join(r for r in rules if r)
