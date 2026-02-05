@@ -2,17 +2,6 @@
 from __future__ import annotations
 import random
 
-# === Промпты, которые ждёт онбординг ===
-INTERFACE_LANG_PROMPT = {
-    "ru": "Выбери язык интерфейса:\nChoose your interface language:",
-    "en": "Выбери язык интерфейса:\nChoose your interface language:",
-}
-
-TARGET_LANG_PROMPT = {
-    "ru": "Выбери язык для изучения:",
-    "en": "Choose a language to learn:",
-}
-
 # Стартовое сообщение (двуязычное)
 START_MESSAGE = {
     "ru": (
@@ -62,7 +51,7 @@ def get_tariff_intro_msg(
     """
     Возвращает второе сообщение после интро — в зависимости от тарифа.
     """
-    L = "ru" if lang == "ru" else "en"
+    L = "ru" if (lang or "").lower() == "ru" else "en"
 
     def _ru_days(n: int) -> str:
         n = abs(int(n))
