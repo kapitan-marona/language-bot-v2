@@ -33,7 +33,8 @@ class OnboardingScenario:
             pass
 
     async def start(self, ctx):
-        self.onb.set_stage(ctx.user_id, "interface_lang")
+        # ✅ /start должен реально сбрасывать онбординг, иначе completed=1 оставляет нас в settings-роутинге
+        self.onb.reset(ctx.user_id, "interface_lang")
         await ctx.update.message.reply_text(
             t("choose_interface_lang", "ru"),
             reply_markup=kb_interface_lang(),
@@ -45,16 +46,15 @@ class OnboardingScenario:
         - allowed only at promo_ask stage
         """
         stage = (ctx.onboarding or {}).get("stage", "interface_lang")
-        il = ctx.user.get("interface_lang", "ru")
+        il = (ctx.user.get("interface_lang") or "ru")
 
         if stage == "interface_lang":
-            # Первый экран всегда двуязычный и не зависит от текущего user.interface_lang
+            # ✅ Первый экран всегда двуязычный и стабильный
             await ctx.update.message.reply_text(
                 t("choose_interface_lang", "ru"),
                 reply_markup=kb_interface_lang(),
             )
             return
-
 
         if stage == "promo_ask":
             # promo вводим текстом; применим позже через PromoArbiter
@@ -104,7 +104,7 @@ class OnboardingScenario:
         await q.answer()
 
         data = q.data or ""
-        il = ctx.user.get("interface_lang", "ru")
+        il = (ctx.user.get("interface_lang") or "ru")
 
         # Step 1: interface language
         if data.startswith("onb:iface:"):
@@ -167,8 +167,6 @@ class OnboardingScenario:
             )
             return
 
-        # Step 5: level done
-
         # Step 6: duplication selected
         if data.startswith("onb:dub:"):
             v = data.split(":")[-1]
@@ -215,5 +213,5 @@ class OnboardingScenario:
         await q.message.chat.send_message(t("onboarding_unknown_state", il))
 
     async def voice_not_allowed(self, ctx):
-        il = ctx.user.get("interface_lang", "ru")
+        il = (ctx.user.get("interface_lang") or "ru")
         await ctx.update.message.reply_text(t("voice_not_in_onboarding", il))

@@ -96,6 +96,11 @@ class Dispatcher:
     async def handle_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         ctx = await self._build_ctx(update, context)
 
+        # ✅ Safety: onboarding callbacks always go to onboarding handler
+        data = (update.callback_query.data or "") if update.callback_query else ""
+        if data.startswith("onb:"):
+            return await self.onboarding.handle_callback(ctx)
+
         # Onboarding callbacks should be handled during onboarding
         if not ctx.onboarding or int(ctx.onboarding["completed"]) == 0:
             return await self.onboarding.handle_callback(ctx)
