@@ -53,6 +53,9 @@ class Dispatcher:
             # We'll wire PromoScenario later; for now show placeholder
             return await self.settings.promo_placeholder(ctx)
 
+        if text.startswith("/debug_user"):
+            return await self.settings.debug_user(ctx)
+
         # Fallback: show help
         return await self.settings.help(ctx)
 
