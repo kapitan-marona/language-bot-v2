@@ -48,11 +48,13 @@ class OnboardingScenario:
         il = ctx.user.get("interface_lang", "ru")
 
         if stage == "interface_lang":
+            # Первый экран всегда двуязычный и не зависит от текущего user.interface_lang
             await ctx.update.message.reply_text(
-                t("choose_interface_lang", il),
+                t("choose_interface_lang", "ru"),
                 reply_markup=kb_interface_lang(),
             )
             return
+
 
         if stage == "promo_ask":
             # promo вводим текстом; применим позже через PromoArbiter
