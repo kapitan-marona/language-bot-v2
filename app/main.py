@@ -6,6 +6,8 @@ from app.bot import get_telegram_app, ensure_started
 from app.storage.db import init_db
 from app.utils.logging import setup_logging
 
+setup_logging()
+
 app = FastAPI()
 log = logging.getLogger(__name__)
 

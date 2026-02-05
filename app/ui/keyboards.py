@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from app.ui.levels_texts import LEVEL_GUIDE_BUTTON, LEVEL_GUIDE_CLOSE_BUTTON, LEVEL_DONE_BUTTON
+from .levels_texts import LEVEL_GUIDE_BUTTON, LEVEL_GUIDE_CLOSE_BUTTON, LEVEL_DONE_BUTTON
 
 
 def kb_interface_lang() -> InlineKeyboardMarkup:
