@@ -57,13 +57,9 @@ def kb_level(lang="ru"):
             InlineKeyboardButton("C2", callback_data="onb:level:C2"),
         ],
         [
-            InlineKeyboardButton(
-                LEVEL_GUIDE_BUTTON[L],
-                callback_data="onb:level_help"
-            )
+            InlineKeyboardButton(LEVEL_GUIDE_BUTTON[L], callback_data="onb:level_help")
         ],
     ]
-
     return InlineKeyboardMarkup(buttons)
 
 
@@ -72,7 +68,7 @@ def kb_level_guide_close(lang: str = "ru") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
         InlineKeyboardButton(
             LEVEL_GUIDE_CLOSE_BUTTON.get(lang, LEVEL_GUIDE_CLOSE_BUTTON["ru"]),
-            callback_data="onb:level_help_close"
+            callback_data="onb:level_help_close",
         )
     ]])
 
@@ -107,129 +103,35 @@ def kb_style(lang: str = "ru") -> InlineKeyboardMarkup:
 
 
 # -------------------------
-# Settings keyboards (NEW)
-# callback prefix: set:...
+# Translator panel (NEW)
+# callback prefix: tr:...
 # -------------------------
 
-def kb_settings(
-    lang: str,
-    *,
-    task_mode: str,
-    translator_direction: str,
-    translator_style: str,
-    translator_output: str,
-) -> InlineKeyboardMarkup:
+def kb_translator_panel(lang: str, direction_db: str, output: str) -> InlineKeyboardMarkup:
     """
-    task_mode: chat|translator
-    translator_direction: ui_to_target|target_to_ui
-    translator_style: casual|business
-    translator_output: text|voice
+    direction_db: ui_to_target | target_to_ui
+    output: text | voice
     """
     lang = lang if lang in ("ru", "en") else "ru"
+    direction_db = direction_db if direction_db in ("ui_to_target", "target_to_ui") else "ui_to_target"
+    output = output if output in ("text", "voice") else "text"
 
-    # Toggle label
     if lang == "en":
-        mode_label = "🟢 Translator: ON" if task_mode == "translator" else "⚪️ Translator: OFF"
-        dir_label = "↔️ Direction"
-        style_label = "🎭 Style"
-        out_label = "🎙 Output"
-        close_label = "✖️ Close"
+        off = "⏹ Translator OFF"
+        toggle = "🔁 Toggle direction"
+        text_btn = "⌨️ /text"
+        voice_btn = "🎙 /voice"
     else:
-        mode_label = "🟢 Переводчик: ВКЛ" if task_mode == "translator" else "⚪️ Переводчик: ВЫКЛ"
-        dir_label = "↔️ Направление"
-        style_label = "🎭 Стиль"
-        out_label = "🎙 Вывод"
-        close_label = "✖️ Закрыть"
-
-    # Current values (small, readable)
-    if lang == "en":
-        dir_val = "UI → Target" if translator_direction == "ui_to_target" else "Target → UI"
-        style_val = "Casual" if translator_style == "casual" else "Business"
-        out_val = "Text" if translator_output == "text" else "Voice"
-    else:
-        dir_val = "Интерфейс → Язык" if translator_direction == "ui_to_target" else "Язык → Интерфейс"
-        style_val = "Разговорный" if translator_style == "casual" else "Деловой"
-        out_val = "Текст" if translator_output == "text" else "Голос"
+        off = "⏹ Выключить"
+        toggle = "🔁 Сменить направление"
+        text_btn = "⌨️ /text"
+        voice_btn = "🎙 /voice"
 
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(mode_label, callback_data="set:mode:toggle")],
+        [InlineKeyboardButton(off, callback_data="tr:off")],
+        [InlineKeyboardButton(toggle, callback_data="tr:dir:toggle")],
         [
-            InlineKeyboardButton(f"{dir_label}: {dir_val}", callback_data="set:open:direction"),
+            InlineKeyboardButton(text_btn, callback_data="tr:out:text"),
+            InlineKeyboardButton(voice_btn, callback_data="tr:out:voice"),
         ],
-        [
-            InlineKeyboardButton(f"{style_label}: {style_val}", callback_data="set:open:style"),
-        ],
-        [
-            InlineKeyboardButton(f"{out_label}: {out_val}", callback_data="set:open:output"),
-        ],
-        [InlineKeyboardButton(close_label, callback_data="set:close")],
-    ])
-
-
-def kb_translator_direction(lang: str, current: str) -> InlineKeyboardMarkup:
-    lang = lang if lang in ("ru", "en") else "ru"
-    current = current if current in ("ui_to_target", "target_to_ui") else "ui_to_target"
-
-    if lang == "en":
-        a = "UI → Target"
-        b = "Target → UI"
-        back = "← Back"
-    else:
-        a = "Интерфейс → Язык"
-        b = "Язык → Интерфейс"
-        back = "← Назад"
-
-    a_mark = " ✅" if current == "ui_to_target" else ""
-    b_mark = " ✅" if current == "target_to_ui" else ""
-
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(a + a_mark, callback_data="set:tdir:ui_to_target")],
-        [InlineKeyboardButton(b + b_mark, callback_data="set:tdir:target_to_ui")],
-        [InlineKeyboardButton(back, callback_data="set:back:settings")],
-    ])
-
-
-def kb_translator_style(lang: str, current: str) -> InlineKeyboardMarkup:
-    lang = lang if lang in ("ru", "en") else "ru"
-    current = current if current in ("casual", "business") else "casual"
-
-    if lang == "en":
-        a = "😎 Casual"
-        b = "🧑‍💼 Business"
-        back = "← Back"
-    else:
-        a = "😎 Разговорный"
-        b = "🧑‍💼 Деловой"
-        back = "← Назад"
-
-    a_mark = " ✅" if current == "casual" else ""
-    b_mark = " ✅" if current == "business" else ""
-
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(a + a_mark, callback_data="set:tstyle:casual")],
-        [InlineKeyboardButton(b + b_mark, callback_data="set:tstyle:business")],
-        [InlineKeyboardButton(back, callback_data="set:back:settings")],
-    ])
-
-
-def kb_translator_output(lang: str, current: str) -> InlineKeyboardMarkup:
-    lang = lang if lang in ("ru", "en") else "ru"
-    current = current if current in ("text", "voice") else "text"
-
-    if lang == "en":
-        a = "Text"
-        b = "Voice"
-        back = "← Back"
-    else:
-        a = "Текст"
-        b = "Голос"
-        back = "← Назад"
-
-    a_mark = " ✅" if current == "text" else ""
-    b_mark = " ✅" if current == "voice" else ""
-
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(a + a_mark, callback_data="set:tout:text")],
-        [InlineKeyboardButton(b + b_mark, callback_data="set:tout:voice")],
-        [InlineKeyboardButton(back, callback_data="set:back:settings")],
     ])

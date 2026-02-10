@@ -417,23 +417,17 @@ def get_system_prompt(
     if tm == "translator":
         direction = (translator_cfg or {}).get("direction", "ui→target")
         out = (translator_cfg or {}).get("output", "text")
-        tstyle = (translator_cfg or {}).get("style", "casual")
+
         rules += [
             "TRANSLATOR mode.",
             "Return ONLY the translation. No comments, no templates, no follow-up question.",
-            ("Register: casual, idiomatic." if tstyle == "casual" else "Register: business, neutral, concise."),
+            "No emojis. No greetings. No extra words.",
             ("Direction: UI→TARGET." if direction == "ui→target" else "Direction: TARGET→UI."),
+            "Prefer natural, faithful translation close to the original meaning and tone.",
             "Prefer established equivalents for idioms/proverbs; otherwise translate faithfully.",
             ("Keep sentences short and well-paced for voice." if out == "voice" else ""),
         ]
-    else:
-        rules += [
-            "CHAT mode.",
-            "End with ONE short, natural follow-up question in TARGET unless it was a command, goodbye/thanks, or you just asked for confirmation.",
-            "Follow-up questions should feel spontaneous and conversational, not like a test or teacher prompt.",
-            "If the user asks to translate ('переведи','translate','как будет','how to say'): acknowledge briefly, give one-line translation in TARGET, then ONE short follow-up question in TARGET.",
-            "Prefer established equivalents for idioms; otherwise translate faithfully.",
-        ]
+
 
     return "\n".join(r for r in rules if r)
 

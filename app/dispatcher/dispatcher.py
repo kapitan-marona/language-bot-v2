@@ -32,6 +32,7 @@ class Dispatcher:
     async def handle_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         ctx = await self._build_ctx(update, context)
         text = update.message.text.strip()
+        task_mode = (ctx.user.get("task_mode") or "chat")
 
         # System commands priority
         if text.startswith("/start"):
@@ -40,8 +41,12 @@ class Dispatcher:
         if text.startswith("/help"):
             return await self.settings.help(ctx)
 
-        if text.startswith("/settings"):
-            return await self.settings.open(ctx)
+        # Global input mode commands (work in BOTH chat & translator)
+        if text.startswith("/text"):
+            return await self.settings.set_text_mode(ctx)
+
+        if text.startswith("/voice"):
+            return await self.settings.set_voice_mode(ctx)
 
         if text.startswith("/translator_on"):
             return await self.settings.translator_on(ctx)
@@ -49,11 +54,15 @@ class Dispatcher:
         if text.startswith("/translator_off"):
             return await self.settings.translator_off(ctx)
 
+        # Hide settings in translator mode
+        if text.startswith("/settings"):
+            if task_mode == "translator":
+                return await self.settings.open(ctx)  # will show "blocked" message
+            return await self.settings.open(ctx)
+
         if text.startswith("/promo"):
-            # We'll wire PromoScenario later; for now show placeholder
             return await self.settings.promo_placeholder(ctx)
 
-        # ✅ DEBUG
         if text.startswith("/debug_user"):
             return await self.settings.debug_user(ctx)
 
@@ -61,10 +70,6 @@ class Dispatcher:
         return await self.settings.help(ctx)
 
     async def handle_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # ✅ If a command arrived as plain text, still route it to handle_command
-        if update.message and update.message.text and update.message.text.strip().startswith("/"):
-            return await self.handle_command(update, context)
-
         ctx = await self._build_ctx(update, context)
 
         # Onboarding capture
@@ -77,7 +82,7 @@ class Dispatcher:
             return await self.settings.limit_reached(ctx, decision)
 
         # Route by task_mode
-        if ctx.user.get("task_mode") == "translator":
+        if (ctx.user.get("task_mode") or "chat") == "translator":
             self.usage_gate.consume(ctx.user_id)
             return await self.translator.handle(ctx)
 
@@ -95,23 +100,23 @@ class Dispatcher:
         if not decision.ok:
             return await self.settings.limit_reached(ctx, decision)
 
-        # For now: placeholder (we will add STT/TTS later)
         self.usage_gate.consume(ctx.user_id)
-        if ctx.user.get("task_mode") == "translator":
+        if (ctx.user.get("task_mode") or "chat") == "translator":
             return await self.translator.voice_placeholder(ctx)
         return await self.chat.voice_placeholder(ctx)
 
     async def handle_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         ctx = await self._build_ctx(update, context)
 
-        # ✅ Safety: onboarding callbacks always go to onboarding handler
-        data = (update.callback_query.data or "") if update.callback_query else ""
-        if data.startswith("onb:"):
-            return await self.onboarding.handle_callback(ctx)
-
         # Onboarding callbacks should be handled during onboarding
         if not ctx.onboarding or int(ctx.onboarding["completed"]) == 0:
             return await self.onboarding.handle_callback(ctx)
 
-        # Otherwise settings callbacks (later)
+        data = (ctx.update.callback_query.data or "")
+
+        # ✅ Translator panel callbacks
+        if data.startswith("tr:"):
+            return await self.translator.handle_callback(ctx)
+
+        # Otherwise settings callbacks (future)
         return await self.settings.handle_callback(ctx)
