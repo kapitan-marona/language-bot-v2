@@ -1,8 +1,20 @@
 from app.storage.db import get_conn
 
 
+def _column_exists(conn, table: str, column: str) -> bool:
+    rows = conn.execute(f"PRAGMA table_info({table});").fetchall()
+    cols = {r[1] for r in rows}  # (cid, name, type, notnull, dflt_value, pk)
+    return column in cols
+
+
+def _add_column_if_missing(conn, table: str, column: str, ddl: str) -> None:
+    if not _column_exists(conn, table, column):
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {ddl};")
+
+
 def run_migrations() -> None:
     with get_conn() as conn:
+        # --- core tables ---
         conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
           user_id INTEGER PRIMARY KEY,
@@ -18,6 +30,10 @@ def run_migrations() -> None:
           updated_at TEXT NOT NULL
         );
         """)
+
+        # ✅ add missing translator prefs for existing DBs (safe)
+        _add_column_if_missing(conn, "users", "translator_style", "translator_style TEXT NOT NULL DEFAULT 'casual'")   # casual|business
+        _add_column_if_missing(conn, "users", "translator_output", "translator_output TEXT NOT NULL DEFAULT 'text'")  # text|voice
 
         conn.execute("""
         CREATE TABLE IF NOT EXISTS onboarding (
@@ -65,6 +81,18 @@ def run_migrations() -> None:
 
         conn.execute("""
         CREATE TABLE IF NOT EXISTS chat_messages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          role TEXT NOT NULL,        -- user|assistant
+          content TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+        );
+        """)
+
+        # ✅ NEW: separate translator history (does NOT mix with chat)
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS translator_messages (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           user_id INTEGER NOT NULL,
           role TEXT NOT NULL,        -- user|assistant

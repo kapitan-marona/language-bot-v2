@@ -1,8 +1,6 @@
-# app/ui/texts.py
-
 TEXTS = {
     "ru": {
-        # Onboarding UI (короткие вопросы/заголовки для экранов)
+        # Onboarding UI
         "choose_interface_lang": "Выбери язык интерфейса:\nChoose your interface language:",
         "choose_target_lang": "Выбери язык для изучения:",
         "choose_level": "🧠 Выбери свой уровень:",
@@ -19,7 +17,13 @@ TEXTS = {
         "translator_on": "Переводчик включён. Чтобы выйти: /translator_off",
         "translator_off": "Чат-режим включён. Чтобы включить переводчик: /translator_on",
 
-        # Stubs (пока не подключили)
+        # Settings (NEW)
+        "settings_title": "⚙️ Настройки",
+        "settings_direction": "↔️ Направление перевода",
+        "settings_tstyle": "🎭 Стиль перевода",
+        "settings_toutput": "🎙 Формат вывода",
+
+        # Stubs (если где-то ещё вызываются)
         "promo_stub": "Промокоды подключим следующим шагом через единый PromoArbiter.",
         "chat_stub_reply": "Я на месте 🙂 (пока это заглушка). Следующий шаг — подключить модель и контекст 20 пар.",
         "translator_stub": "TRANSLATOR MODE: (заглушка) — сюда подключим чистый перевод без смайлов и пояснений.",
@@ -45,6 +49,12 @@ TEXTS = {
         # Modes
         "translator_on": "Translator enabled. Exit: /translator_off",
         "translator_off": "Chat mode enabled. Enable translator: /translator_on",
+
+        # Settings (NEW)
+        "settings_title": "⚙️ Settings",
+        "settings_direction": "↔️ Translation direction",
+        "settings_tstyle": "🎭 Translation style",
+        "settings_toutput": "🎙 Output format",
 
         # Stubs
         "promo_stub": "Promo codes will be implemented next via a single PromoArbiter.",
