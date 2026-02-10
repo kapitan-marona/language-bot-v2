@@ -1,4 +1,3 @@
-# app/domain/prompt_templates.py
 from __future__ import annotations
 import random
 
@@ -175,7 +174,6 @@ INTRO_QUESTIONS = {
 
 # --- Простые старт-вопросы для низких уровней и делового стиля ---
 
-# A0–A2: «старые друзья», с эмодзи
 INTRO_QUESTIONS_CASUAL_A = {
     "en": [
         "Hi! How are you today? 🙂",
@@ -228,7 +226,6 @@ INTRO_QUESTIONS_CASUAL_A = {
     ],
 }
 
-# A0–A2: простой деловой стиль
 INTRO_QUESTIONS_BUSINESS_A = {
     "en": [
         "How is your day at work? 🙂",
@@ -281,7 +278,6 @@ INTRO_QUESTIONS_BUSINESS_A = {
     ],
 }
 
-# B1–C2: деловой стиль (поглубже)
 INTRO_QUESTIONS_BUSINESS_B = {
     "en": [
         "What project are you focused on this week?",
@@ -309,7 +305,7 @@ INTRO_QUESTIONS_BUSINESS_B = {
         "Quel processus aimerais-tu améliorer au travail ?",
         "Comment te prépares-tu aux réunions importantes ?",
         "Quelles compétences développes-tu en ce moment ?",
-        "Quel défi récent votre équipe a-t-elle résolu ?",
+        "Quel défi récent votre équipe a-t-il résolu ?",
     ],
     "sv": [
         "Vilket projekt fokuserar du på den här veckan?",
@@ -364,16 +360,11 @@ def get_system_prompt(
     mode: str,
     task_mode: str = "chat",
     translator_cfg: dict | None = None,
-    dub_interface_for_low_levels: bool | int | None = None,  # ✅ ADD
 ) -> str:
     """
-    КОМПАКТНАЯ системка для быстрого отклика без потери «характера».
-    Включает:
-      • дружелюбный persona Мэтта (шутки, сокращения, известные аббревиатуры),
-      • подстройку под настроение пользователя,
-      • жёсткий лимит длины ответа по уровню,
-      • лаконичные ветки CHAT / TRANSLATOR,
-      • безопасные правила форматирования и TTS.
+    Компактная системка.
+    Главный принцип для CHAT: отвечать ТОЛЬКО на TARGET (никогда не переходить на UI).
+    Переводы/дубляж на UI делает бот отдельным сообщением (в коде), модель их НЕ пишет.
     """
     style = (style or "casual").lower()
     lvl   = (level or "A2").upper()
@@ -382,47 +373,45 @@ def get_system_prompt(
     md    = (mode or "text").lower()
     tm    = (task_mode or "chat").lower()
 
-    # ✅ ADD: decide if we need UI-duplicate
-    dub_on = bool(dub_interface_for_low_levels)
-    need_ui_dup = dub_on and (lvl in ("A0", "A1")) and (ui != tgt) and (tm != "translator")
-
-    # [CHANGED] Крошечные стиль-хинты для проблемных и усиляемых языков — минимально, чтоб не замедлять.
     style_hint = ""
-    if tgt in ("ru", "fi", "sv", "fr", "es"):  # [CHANGED]
+    if tgt in ("ru", "fi", "sv", "fr", "es"):
         examples = {
             "ru": 'Example (RU, casual): "Привет! Как дела? Погнали дальше?" — use short everyday phrasing.',
             "fi": 'Example (FI, casual): "Moi! Mitä kuuluu? Jatketaanko?" — keep it simple and everyday.',
             "sv": 'Example (SV, casual): "Hej! Hur är läget? Kör vi?" — keep it light and natural.',
-            # [CHANGED] Французский и испанский — разговорность + простая грамматика на низких уровнях
             "fr": "In French, prefer casual everyday phrasing (e.g., 'Salut, ça va ?'). Use contractions (c'est, j'ai). At A0–B1 avoid overly formal tone and complex tenses.",
             "es": "In Spanish, prefer simple everyday forms (e.g., '¿Qué tal?'). Use common expressions. At A0–B1 avoid unnecessary subjunctive or overly formal phrasing.",
         }
         style_hint = examples.get(tgt, "")
 
     rules: list[str] = [
-        # Роль, цели, каналы
         "You are Matt — a friendly, witty conversation partner (not a tutor persona).",
         f"TARGET language: {tgt}. UI language: {ui}. Mode: {md}.",
-        # Персона и подстройка
         *_persona_rules(style=style, target_lang=tgt),
-        # Длина/сложность по уровню
+
         _cap_for_level(lvl),
-        # Форматирование/аудио
+
         "Use HTML <b>…</b> for bold (no Markdown).",
-        "Do not talk about audio/TTS; just write text that sounds natural if read aloud.",
-        # Естественность
+
+        # ✅ ВАЖНО: железное правило языка
+        "CHAT OUTPUT RULE: Write the main reply ONLY in the TARGET language. Never switch to UI language, even if the user asks or says they don't understand.",
+        "If the user struggles, simplify in TARGET (shorter sentences, easier words). You may add 1 very short example sentence in TARGET, but still TARGET only.",
+
+        # ✅ ВАЖНО: никакого дубляжа внутри ответа (это делает бот кодом)
+        "Do NOT include translations, duplicates, or 'UI:' sections in your reply. The app will handle any UI-language duplication outside the model.",
+        "Do NOT paraphrase the reply in another language. Output must be a single TARGET-language message.",
+
         "Prefer contemporary, idiomatic TARGET-language phrasing; avoid literal calques from UI unless asked.",
-        "Favor everyday phrasing used in casual chats/messages by native speakers; avoid overly formal or academic tone unless style=business.",  # [CHANGED]
-        style_hint,  # [CHANGED]
-        # Коррекция без «повтора всего»
+        "Favor everyday phrasing used in casual chats/messages by native speakers; avoid overly formal or academic tone unless style=business.",
+        style_hint,
+
         "Don't echo the entire user sentence when correcting; replace only 1–3 tokens; keep proper nouns/brands intact.",
-        "When correcting, sound natural — rephrase instead of word-for-word fixes if that’s how natives would say it.",  # [CHANGED]
+        "When correcting, sound natural — rephrase instead of word-for-word fixes if that’s how natives would say it.",
     ]
 
-    # [CHANGED] Для продвинутых уровней — мягкое использование связок (без перегруза).
     if lvl in ("C1", "C2"):
         rules += [
-            "At advanced levels, you may use idiomatic connectors (e.g., 'anyway', 'так что', 'no mutta') naturally, but not in every reply."  # [CHANGED]
+            "At advanced levels, you may use idiomatic connectors naturally, but not in every reply."
         ]
 
     if tm == "translator":
@@ -440,27 +429,16 @@ def get_system_prompt(
     else:
         rules += [
             "CHAT mode.",
-            # продолжение беседы (бережно)
             "End with ONE short, natural follow-up question in TARGET unless it was a command, goodbye/thanks, or you just asked for confirmation.",
-            "Follow-up questions should feel spontaneous and conversational, not like a test or teacher prompt.",  # [CHANGED]
-            # быстрый паттерн «переведи»
-            "If the user asks to translate ('переведи','translate','как будет','how to say'): (1) brief positive ack; (2) one-line translation matching style & level; (3) ONE short follow-up in TARGET.",
+            "Follow-up questions should feel spontaneous and conversational, not like a test or teacher prompt.",
+            "If the user asks to translate ('переведи','translate','как будет','how to say'): acknowledge briefly, give one-line translation in TARGET, then ONE short follow-up question in TARGET.",
             "Prefer established equivalents for idioms; otherwise translate faithfully.",
         ]
 
-        # ✅ ADD: UI duplicate for low levels (A0/A1) when enabled
-        if need_ui_dup:
-            rules += [
-                "After your TARGET-language reply, add a short UI-language duplicate (ONE short sentence) on a new line prefixed exactly with 'UI: '.",
-                "The UI duplicate must NOT add a second follow-up question. It should briefly mirror the meaning of your reply.",
-            ]
-
-    # Собираем без пустых строк
     return "\n".join(r for r in rules if r)
 
 
 def _cap_for_level(lvl: str) -> str:
-    """Жёсткий CAP по длине ответа → меньше токенов и быстрее отклик."""
     if lvl == "A0":
         return "Keep it very simple. Max 1–2 short sentences per reply."
     if lvl == "A1":
@@ -471,22 +449,13 @@ def _cap_for_level(lvl: str) -> str:
         return "Use only TARGET. Max 2–4 sentences per reply."
     if lvl == "B2":
         return "Natural TARGET. Max 2–5 sentences per reply."
-    # C1/C2
-    return "Native-like TARGET. Max 2–5 sentences per reply. Prefer 1–2 longer sentences + 2–3 short ones to keep rhythm natural."  # [CHANGED]
+    return "Native-like TARGET. Max 2–5 sentences per reply. Prefer 1–2 longer sentences + 2–3 short ones to keep rhythm natural."
 
 
 def _persona_rules(style: str, target_lang: str) -> list[str]:
-    """
-    Характер Мэтта и «подхват настроения»:
-      • лёгкий юмор; уместные шутки без перегруза,
-      • сокращения и известные аббревиатуры,
-      • эмодзи 0–2, адаптация к энергии/настроению пользователя,
-      • стиль зависит от business/casual.
-    """
     business = style in ("business", "formal", "professional")
     rules = []
 
-    # Базовая манера речи
     if business:
         rules += [
             "Persona: calm, clear, supportive; dry humor allowed sparingly.",
@@ -498,26 +467,20 @@ def _persona_rules(style: str, target_lang: str) -> list[str]:
             "Use up to 0–2 emojis if they fit the context (never every sentence).",
         ]
 
-    # Сокращения и аббревиатуры — универсально (применять уместно для TARGET-языка)
     rules += [
-        "Use well-known contractions/short forms that are natural in the TARGET language (e.g., English I'm/you're; French c'est/j'ai) when appropriate to level/style.",
-        "Use common abbreviations only when they aid clarity or match the user vibe (e.g., 'BTW', 'FYI' in English) — avoid niche jargon.",
+        "Use well-known contractions/short forms that are natural in the TARGET language when appropriate to level/style.",
+        "Use common abbreviations only when they aid clarity or match the user vibe — avoid niche jargon.",
     ]
 
-    # [CHANGED] Дружеские обращения/сленг/сокращения для НЕ-английских, если уместно по уровню и стилю.
-    if target_lang not in ("en",):  # [CHANGED]
+    if target_lang not in ("en",):
         rules += [
-            "When appropriate for level/style, use friendly address forms and common colloquialisms/slang natural to the TARGET language (keep it polite and non-offensive).",  # [CHANGED]
+            "When appropriate for level/style, use friendly address forms and common colloquialisms/slangULE natural to the TARGET language (keep it polite and non-offensive).",
         ]
 
-    # Подхват настроения
     rules += [
-        "Subtly mirror the user's mood and energy (enthusiastic ↔ calm) lightly; do not exaggerate or overadapt.",  # [CHANGED]
-    ]
-
-    # Язык зависит от TARGET — не перескакивать в UI без запроса
-    rules += [
-        "Speak in the TARGET language by default; switch to UI language only when explicitly asked or for tiny parenthetical hints for A0–A1 (if UI != TARGET).",
+        "Subtly mirror the user's mood and energy lightly; do not exaggerate or overadapt.",
+        # ✅ Жёстко: не переключаемся на UI
+        "Never switch to the UI language in chat replies. Always stay in TARGET.",
     ]
 
     return rules

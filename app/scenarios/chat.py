@@ -20,13 +20,13 @@ class ChatScenario:
         mode = (user.get("mode") or "text").lower()
         dub = int(user.get("dub_interface_for_low_levels") or 0)
 
-        # 1️⃣ сохраняем юзера
+        # 1) сохраняем юзера
         self.chat.add(ctx.user_id, "user", user_text)
 
-        # 2️⃣ история
+        # 2) берём историю (20 пар = 40 сообщений)
         msgs = self.chat.get_last_pairs(ctx.user_id, pairs=20)
 
-        # 3️⃣ системка Мэтта
+        # 3) системка Мэтта
         system_prompt = get_system_prompt(
             style=style,
             level=level,
@@ -37,28 +37,30 @@ class ChatScenario:
             translator_cfg=None,
         )
 
-        # 4️⃣ основной ответ
+        # 4) ответ модели (TARGET only)
         reply = ask_openai_chat(system_prompt=system_prompt, messages=msgs)
 
-        # 5️⃣ сохраняем
+        # 5) сохраняем и режем
         self.chat.add(ctx.user_id, "assistant", reply)
         self.chat.trim_to_pairs(ctx.user_id, pairs=20)
 
-        # 6️⃣ отправляем основной ответ
+        # 6) отправляем основной ответ
         await ctx.update.message.reply_text(reply, parse_mode="HTML")
 
-        # ---------------------------------------------------
-        # ⭐ НОВОЕ: ДУБЛЯЖ ДЛЯ A0/A1
-        # ---------------------------------------------------
+        # 7) дубляж (A0/A1 + флаг + разные языки)
         if dub and level in ("A0", "A1") and il != target:
+            # защита от случаев, когда модель сама уже добавила перевод/дубль
+            low = (reply or "").lower()
+            if "ui:" in low or "translation:" in low or "перевод:" in low:
+                return
 
             translate_prompt = (
                 f"Translate the following message to {il}. "
-                f"Return ONLY translation.\n\n{reply}"
+                f"Return ONLY the translation. Do not add comments.\n\n{reply}"
             )
 
             translated = ask_openai_chat(
-                system_prompt="You are a translator.",
+                system_prompt="You are a translator. Output only the translation.",
                 messages=[{"role": "user", "content": translate_prompt}],
             )
 
